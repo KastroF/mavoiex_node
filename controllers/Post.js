@@ -1,6 +1,7 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
 const Message = require("../models/Message");
+const DeviceToken = require("../models/DeviceToken");
 const sendNotification = require("../utils/SendPushNotification"); 
 
 
@@ -99,7 +100,8 @@ exports.getPaginatedPosts = async (req, res) => {
         isLiked,
         totalMessages,
         messages,
-        messageStartAt
+        messageStartAt,
+        views: post.views || 0,
       };
     }));
 
@@ -150,6 +152,30 @@ exports.toggleLikePost = async (req, res) => {
       totalLikes: post.likes.length,
       status: 0
     });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+};
+
+
+exports.incrementViews = async (req, res) => {
+  try {
+    const { postId } = req.body;
+    if (!postId) {
+      return res.status(400).json({ error: "postId est requis." });
+    }
+
+    const post = await Post.findByIdAndUpdate(
+      postId,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+
+    if (!post) {
+      return res.status(404).json({ error: "Post introuvable." });
+    }
+
+    res.status(200).json({ views: post.views, status: 0 });
   } catch (err) {
     res.status(500).json({ error: "Erreur serveur." });
   }

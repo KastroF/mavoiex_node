@@ -5,9 +5,11 @@ const router = express.Router();
 const userCtrl = require("../controllers/User");
 const auth = require("../middlewares/auth");
 
-router.post("/adduser", userCtrl.signUp); 
+router.post("/adduser", userCtrl.signUp);
 router.post("/signin", userCtrl.signIn);
 router.post("/addfcmtoken", auth, userCtrl.addFcmToken);
 router.post("/removefcmtoken", auth, userCtrl.removeFcmToken);
+router.get("/profile", auth, userCtrl.getProfile);
+router.post("/profile/update", auth, userCtrl.updateProfile);
 
 module.exports = router; 

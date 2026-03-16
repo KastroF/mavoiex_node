@@ -1,4 +1,5 @@
-const User = require("../models/User"); 
+const User = require("../models/User");
+const Post = require("../models/Post");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
@@ -118,7 +119,7 @@ exports.signIn = async (req, res) =>     {
               
           }else{
             
-              const compare = await bcrypt.compare(user.password, req.body.password); 
+              const compare = await bcrypt.compare(req.body.password, user.password); 
               
               if(!compare){
                 
@@ -205,6 +206,53 @@ exports.addFcmToken =  async (req, res) => {
   res.status(201).json({ success: true, status: 0 });
 }
 
+
+exports.getProfile = async (req, res) => {
+  try {
+    const userId = req.auth.userId;
+    const user = await User.findById(userId).select('-password -fcmTokens');
+    if (!user) {
+      return res.status(404).json({ status: 1, message: "Utilisateur introuvable" });
+    }
+
+    const postCount = await Post.countDocuments({ userId });
+    const totalLikes = await Post.aggregate([
+      { $match: { userId: user._id } },
+      { $project: { likeCount: { $size: "$likes" } } },
+      { $group: { _id: null, total: { $sum: "$likeCount" } } }
+    ]);
+
+    res.status(200).json({
+      status: 0,
+      user,
+      stats: {
+        posts: postCount,
+        totalLikes: totalLikes.length > 0 ? totalLikes[0].total : 0,
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ status: 1, message: "Erreur serveur" });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.auth.userId;
+    const { name, bio } = req.body;
+
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (bio !== undefined) updateData.bio = bio;
+
+    const user = await User.findByIdAndUpdate(userId, updateData, { new: true }).select('-password -fcmTokens');
+
+    res.status(200).json({ status: 0, user });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ status: 1, message: "Erreur serveur" });
+  }
+};
 
 exports.removeFcmToken = async (req, res) => {
   

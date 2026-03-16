@@ -29,17 +29,30 @@ mongoose.connect(`mongodb+srv://mavoix33:${process.env.MONGOPASS}@cluster0.uogan
   .catch((err) => console.log('Connexion à MongoDB échouée !', err));
 
 
-const userRouter = require("./routes/User"); 
-const postRouter = require("./routes/Post")
-const messagesRouter = require("./routes/Message")
-const tokenRouter = require("./routes/DeviceToken"); 
-
-
+const userRouter = require("./routes/User");
+const postRouter = require("./routes/Post");
+const messagesRouter = require("./routes/Message");
+const tokenRouter = require("./routes/DeviceToken");
+const incidentRouter = require("./routes/Incident");
+const resourceRouter = require("./routes/Resource");
+const emergencyRouter = require("./routes/EmergencyContact");
+const mentorRouter = require("./routes/Mentor");
+const eventRouter = require("./routes/Event");
+const forumRouter = require("./routes/Forum");
+const storyRouter = require("./routes/SuccessStory");
+const statsRouter = require("./routes/Stats");
 
 app.use("/api/token", tokenRouter);
 app.use("/api/user", userRouter);
 app.use("/api/post", postRouter);
 app.use("/api/message", messagesRouter);
-
+app.use("/api/incident", incidentRouter);
+app.use("/api/resource", resourceRouter);
+app.use("/api/emergency", emergencyRouter);
+app.use("/api/mentor", mentorRouter);
+app.use("/api/event", eventRouter);
+app.use("/api/forum", forumRouter);
+app.use("/api/story", storyRouter);
+app.use("/api/stats", statsRouter);
 
 module.exports = app;

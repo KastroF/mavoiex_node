@@ -7,6 +7,7 @@ const postCtrl = require("../controllers/Post");
 
 router.post('/upload', auth, handleUpload, postCtrl.addPost);
 router.post("/getposts", auth, postCtrl.getPaginatedPosts);
-router.post("/like", auth, postCtrl.toggleLikePost)
+router.post("/like", auth, postCtrl.toggleLikePost);
+router.post("/view", auth, postCtrl.incrementViews);
 
 module.exports = router;
