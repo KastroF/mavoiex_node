@@ -2,19 +2,29 @@ const Message = require('../models/Message');
 
 exports.sendMessage = async (req, res) => {
   try {
-    const { senderId, receiverId, content, postId } = req.body;
+    const { receiverId, content, postId } = req.body;
 
-    if (!receiverId || !content) {
-      return res.status(400).json({ message: 'Champs requis manquants.' });
+    console.log("sendMessage body:", req.body);
+    console.log("sendMessage auth:", req.auth);
+
+    if (!content) {
+      return res.status(400).json({ status: 1, message: 'Le contenu est requis.' });
     }
 
-    const message = new Message({ senderId: req.auth.userId, postId, receiverId, content });
+    const message = new Message({
+      senderId: req.auth.userId,
+      postId: postId || null,
+      receiverId: receiverId || null,
+      content
+    });
     await message.save();
 
-    return res.status(201).json({ message: 'Message envoyé avec succès.', data: message });
+    const populated = await Message.findById(message._id).populate('senderId', 'name');
+
+    return res.status(201).json({ status: 0, message: populated });
   } catch (error) {
     console.error('Erreur lors de l\'envoi du message :', error);
-    return res.status(500).json({ message: 'Erreur serveur.' });
+    return res.status(500).json({ status: 1, message: 'Erreur serveur.', error: error.message });
   }
 };
 
